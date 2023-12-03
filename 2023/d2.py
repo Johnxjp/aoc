@@ -22,10 +22,10 @@ def parse_game(unparsed_game):
     """
 
     sets = []
-    n_blue, n_red, n_green = 0, 0, 0
     game_id = int(re.match(r"Game (\d+):", unparsed_game).group(1))
     sets_str = unparsed_game.split(":")[1].split(";")
     for set_str in sets_str:
+        n_blue, n_red, n_green = 0, 0, 0
         match_r = re.search(r"(\d+) red", set_str)
         match_b = re.search(r"(\d+) blue", set_str)
         match_g = re.search(r"(\d+) green", set_str)
@@ -67,5 +67,26 @@ def p1():
     print(sum_valid_game_ids)
 
 
+def game_power(game_sets):
+    min_red, min_blue, min_green = 0, 0, 0
+    for n_red, n_blue, n_green in game_sets:
+        min_red = max(n_red, min_red)
+        min_green = max(n_green, min_green)
+        min_blue = max(n_blue, min_blue)
+
+    return min_red * min_blue * min_green
+
+
+def p2():
+    games = read_lines()
+    running_sum = 0
+    for game in games:
+        game_id, sets = parse_game(game)
+        running_sum += game_power(sets)
+
+    print(running_sum)
+
+
 if __name__ == "__main__":
     p1()
+    p2()
