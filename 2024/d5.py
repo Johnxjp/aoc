@@ -1,3 +1,4 @@
+from functools import cmp_to_key
 from typing import Sequence
 import sys
 
@@ -15,6 +16,7 @@ def is_correctly_ordered(update: Sequence[int], rules: dict[int, list[int]]) -> 
 class OrderedItems:
 
     def __init__(self, item: int, rules: dict[int, list[int]]):
+        """Rules are common across all ordered items"""
         self.item = item
         self.rules = rules
 
@@ -37,10 +39,88 @@ class OrderedItems:
         return self.item
 
 
+class OrderedItems:
+
+    def __init__(self, item: int, rules: dict[int, list[int]]):
+        """Rules are common across all ordered items"""
+        self.item = item
+        self.rules = rules
+
+    def __eq__(self, other):
+        """There is no equal"""
+        return False
+
+    def __lt__(self, other: "OrderedItems"):
+        """Less than, means should appear first which means other should be in list of values"""
+        # If item not in rules, then either rule doesn't exist or greater than or equal
+        # print(self.item, other.item, self.rules)
+        return self.item in self.rules and other.item in self.rules[self.item]
+
+    def __gt__(self, other: "OrderedItems"):
+        """item is in the list of values belonging to key other."""
+        # print(self.item, other.item, self.rules)
+        return other.item in self.rules and self.item in self.rules[other.item]
+
+    def __hash__(self):
+        return self.item
+
+
+class OrderedArray:
+    """Custom array that compares elements based on ordering rules"""
+
+    def __init__(self, items: list[int], rules: dict[int, list[int]]):
+        """
+        Initialize the ordered array with items and comparison rules.
+
+        Args:
+            items: List of integers to store
+            rules: Dictionary where key > all values in its list
+        """
+        self.items = items
+        self.rules = rules
+
+    def _compare(self, a: int, b: int) -> int:
+        """
+        Compare two items based on the rules.
+
+        Returns:
+            -1 if a < b (a should come before b)
+             1 if a > b (a should come after b)
+             0 if no ordering defined
+        """
+        # Check if b is in the list of items less than a
+        if a in self.rules and b in self.rules[a]:
+            return 1  # a > b
+
+        # Check if a is in the list of items less than b
+        if b in self.rules and a in self.rules[b]:
+            return -1  # a < b
+
+        # No direct ordering defined
+        return 0
+
+    def sort(self) -> None:
+        """Sort the array in-place using the custom comparison rules"""
+        self.items.sort(key=cmp_to_key(self._compare))
+
+    def sorted(self) -> "OrderedArray":
+        """Return a new sorted OrderedArray"""
+        new_array = OrderedArray([x for x in self.items], self.rules)
+        new_array.sort()
+        return new_array
+
+    def __len__(self):
+        return len(self.items)
+
+    def __iter__(self):
+        """Make the array iterable"""
+        return iter(self.items)
+
+
 def correct_update(update: Sequence[int], rules: dict[int, list[int]]) -> list[int]:
     """This is a sorting algorithm but with rules. The check for greater or less than is based on rule ordering"""
-    update_custom = [OrderedItems(u, rules) for u in update]
-    return [u.item for u in sorted(update_custom)]
+    update_custom = OrderedArray(update, rules)
+    return update_custom.sorted().items
 
 
 if __name__ == "__main__":
