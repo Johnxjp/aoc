@@ -23,9 +23,12 @@ def _is_valid_equation(
         if op == "*":
             tot = next_val * curr_total
             new_operations = operations + ["*"]
-        else:
+        elif op == "+":
             tot = next_val + curr_total
             new_operations = operations + ["+"]
+        else:
+            # Concat
+            tot = int(str(curr_total) + str(next_val))
 
         result, ops = _is_valid_equation(target, values[1:], new_operations, operator_choice, tot)
         if result:
@@ -34,7 +37,9 @@ def _is_valid_equation(
     return False, []
 
 
-def is_valid_equation(target: int, values: list[int]) -> Tuple[bool, list[str]]:
+def is_valid_equation(
+    target: int, values: list[int], operators: list[str]
+) -> Tuple[bool, list[str]]:
     """
     Solved with search. Choose and see if works then try another.
 
@@ -50,7 +55,6 @@ def is_valid_equation(target: int, values: list[int]) -> Tuple[bool, list[str]]:
     - try to see if target is reachable by multiplying all numbers and seeing if smaller
 
     """
-    operators = ["+", "*"]
     N = len(values)
     output = reduce(lambda x, y: x * y, values)
     if output == target:
@@ -60,7 +64,7 @@ def is_valid_equation(target: int, values: list[int]) -> Tuple[bool, list[str]]:
 
 
 def apply_operations(values, operations) -> int:
-    """ return result """
+    """return result"""
     total = values[0]
     for v, op in zip(values[1:], operations):
         if op == "*":
@@ -68,7 +72,7 @@ def apply_operations(values, operations) -> int:
         else:
             total = total + v
     return total
-        
+
 
 def enumerate_all(target, values):
     sequences = [["+"], ["*"]]
@@ -83,14 +87,26 @@ def enumerate_all(target, values):
     for operations in sequences:
         if apply_operations(values, operations) == target:
             return True, operations
-    
+
     return False, []
 
 
 def p1(target, values) -> int:
     total = 0
+    operations = ["+", "*"]
     for target, values in data:
-        is_valid, _ = is_valid_equation(target, values)
+        is_valid, _ = is_valid_equation(target, values, operations)
+        if is_valid:
+            total += target
+
+    return total
+
+
+def p2(target, values) -> int:
+    total = 0
+    operations = ["+", "*", "|"]
+    for target, values in data:
+        is_valid, _ = is_valid_equation(target, values, operations)
         if is_valid:
             total += target
 
@@ -107,3 +123,4 @@ if __name__ == "__main__":
             data.append((int(target), values))
 
     print(p1(target, values))
+    print(p2(target, values))
