@@ -68,7 +68,7 @@ def get_all_pairs(
 def get_antinode_locs(
     frequency_pair: Tuple[Tuple[int, int], Tuple[int, int]],
 ) -> Tuple[Tuple[int, int], Tuple[int, int]]:
-    """ Takes a pair in and returns two antinode locs valid or not """
+    """Takes a pair in and returns two antinode locs valid or not"""
     p1, p2 = frequency_pair
 
     dx = p1[0] - p2[0]
@@ -78,6 +78,36 @@ def get_antinode_locs(
     a2 = (p2[0] - dx, p2[1] - dy)
     return a1, a2
 
+
+def get_all_antinode_locs(
+    frequency_pair: Tuple[Tuple[int, int], Tuple[int, int]], nrows: int, ncols: int
+) -> list[Tuple[Tuple[int, int], Tuple[int, int]]]:
+    p1, p2 = frequency_pair
+    dx = p1[0] - p2[0]
+    dy = p1[1] - p2[1]
+
+    antinode_locs = []
+    i = 0
+    while True:
+        ax = p1[0] + (dx * i)
+        ay = p1[1] + (dy * i)
+        if is_valid_loc((ax, ay), nrows, ncols):
+            antinode_locs.append((ax, ay))
+            i += 1
+        else:
+            break
+    
+    i = 0
+    while True:
+        ax = p2[0] - (dx * i)
+        ay = p2[1] - (dy * i)
+        if is_valid_loc((ax, ay), nrows, ncols):
+            antinode_locs.append((ax, ay))
+            i += 1
+        else:
+            break
+
+    return set(antinode_locs)
 
 def is_valid_loc(antinode_loc: Tuple[int, int], nrows: int, ncols: int) -> bool:
     x, y = antinode_loc
@@ -102,6 +132,17 @@ def main(filename: str):
                 antinode_locs.add(a1)
             if is_valid_loc(a2, nrows, ncols):
                 antinode_locs.add(a2)
+
+    print(len(antinode_locs))
+
+    # Part 2
+    antinode_locs: Set[Tuple[int, int]] = set()
+    for k, v in locs.items():
+        k_pairs = get_all_pairs(v)
+        for pair in k_pairs:
+            resonant_pairs = get_all_antinode_locs(pair, nrows, ncols)
+            print(k, pair, resonant_pairs)
+            antinode_locs = antinode_locs.union(resonant_pairs)
 
     print(len(antinode_locs))
 
