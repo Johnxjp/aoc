@@ -28,49 +28,42 @@ sample_input = "233313312141413140212"
 
 
 def main(input: str) -> None:
-    ordered_string = ""
+    # Parse input
     spaces = [int(c) for i, c in enumerate(input) if i % 2 == 1]
     blocks = [int(c) for i, c in enumerate(input) if i % 2 == 0]
-    remaining = [(spaces * str(id)) for id, spaces  in enumerate(blocks)]
-    # print(input, spaces, blocks, remaining)
-    space_index = 0
-    blocks_i = 0
-    remaining_index = len(remaining) - 1
-
-    while blocks_i < remaining_index:
-        ordered_string += blocks[blocks_i] * str(blocks_i)
-        remaining_spaces = spaces[space_index]
+    
+    # Build initial disk representation as a list
+    disk = []
+    for i, block_size in enumerate(blocks):
+        # Add file blocks
+        disk.extend([i] * block_size)
+        # Add free space (if not the last file)
+        if i < len(spaces):
+            disk.extend([None] * spaces[i])  # None represents free space
+    
+    # Compact: move blocks from right to left
+    left = 0
+    right = len(disk) - 1
+    
+    while left < right:
+        # Find next free space from left
+        while left < right and disk[left] is not None:
+            left += 1
         
-        # Fill in spaces
-        while remaining_spaces > 0 and blocks_i < remaining_index:
-            r = remaining[remaining_index]
-            blocks_available = len(r)
-            # print(remaining_index, blocks_available, remaining_spaces)
-            if blocks_available > remaining_spaces:
-                bits = r[:remaining_spaces]
-                ordered_string += bits
-                remaining[remaining_index] = r[remaining_spaces:]
-            else:
-                ordered_string += r
-                remaining[remaining_index] = ""
-                remaining_index -= 1
-
-            remaining_spaces -= blocks_available
-
-        blocks_i += 1
-        space_index += 1
-
-    if len(remaining[remaining_index]) > 0:
-        ordered_string += remaining[remaining_index]
-
-    for s in spaces:
-        ordered_string += s * "."
-
-
-    # print(ordered_string)
-    final_output = sum(i * int(c) for i, c in enumerate(ordered_string) if c != ".")
-    print(final_output)
-
+        # Find next file block from right
+        while left < right and disk[right] is None:
+            right -= 1
+        
+        # Swap
+        if left < right:
+            disk[left] = disk[right]
+            disk[right] = None
+            left += 1
+            right -= 1
+    
+    # Calculate checksum
+    checksum = sum(i * file_id for i, file_id in enumerate(disk) if file_id is not None)
+    print(checksum)
 
 if __name__ == "__main__":
     with open("2024/d9.txt") as f:
