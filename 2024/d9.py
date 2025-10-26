@@ -24,7 +24,7 @@ jumps to numbers.
 
 """
 
-sample_input = "233313312141413140212"
+sample_input = "2333133121414131402"
 
 
 def main(input: str) -> None:
@@ -41,6 +41,7 @@ def main(input: str) -> None:
         if i < len(spaces):
             disk.extend([None] * spaces[i])  # None represents free space
     
+    print(disk)
     # Compact: move blocks from right to left
     left = 0
     right = len(disk) - 1
@@ -65,9 +66,64 @@ def main(input: str) -> None:
     checksum = sum(i * file_id for i, file_id in enumerate(disk) if file_id is not None)
     print(checksum)
 
+def day2(input: str):
+    spaces = [int(c) for i, c in enumerate(input) if i % 2 == 1]
+    blocks = [int(c) for i, c in enumerate(input) if i % 2 == 0]
+    
+    # Build initial disk representation as a list
+    disk = []
+    for i, block_size in enumerate(blocks):
+        # Add file blocks
+        disk.extend([i] * block_size)
+        # Add free space (if not the last file)
+        if i < len(spaces):
+            disk.extend([None] * spaces[i])  # None represents free space
+
+    i = len(disk) - 1
+    while i > 0:
+        if (fileid := disk[i]) is not None:
+            block_size = blocks[fileid]
+            # print(fileid, block_size)
+            
+            # Find spaces
+            space_index_start = 0
+            while space_index_start < len(disk):
+                if disk[space_index_start] == fileid:
+                    break
+
+                if disk[space_index_start] is None:
+                    space_size = 0
+                    while (space_index_start + space_size) < len(disk) and disk[space_index_start + space_size] is None:
+                        space_size += 1
+                    # print(fileid, space_index_start, space_index_start + space_size)
+                    if space_size >= block_size:
+                        for j in range(space_index_start, space_index_start + block_size):
+                             disk[j] = fileid
+                        
+                        for j in range(i - block_size + 1, i + 1):
+                            disk[j] = None
+                        break
+
+                    space_index_start += space_size
+
+                else:
+                    space_index_start += 1
+            
+            # Move pointer regardless of if can move block or not
+            i -= block_size
+        else:
+            i -= 1
+    
+    checksum = sum(i * file_id for i, file_id in enumerate(disk) if file_id is not None)
+    # print(disk)
+    print(checksum)
+
+
 if __name__ == "__main__":
     with open("2024/d9.txt") as f:
         input_data = f.read().strip()
-    main(input_data)
 
     main(sample_input)
+    main(input_data)
+    day2(sample_input)
+    day2(input_data)
