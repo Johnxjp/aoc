@@ -52,7 +52,7 @@ def bfs(grid: list[list[int]], target_value: int, r: int, c: int) -> int:
 
     return score
 
-def day1(filename: str, trailhead_ids: int = 0, target_value: int = 9):
+def p1(filename: str, trailhead_ids: int = 0, target_value: int = 9):
     grid = load_grid(filename)
     nrows = len(grid)
     ncols = len(grid[0])
@@ -65,8 +65,44 @@ def day1(filename: str, trailhead_ids: int = 0, target_value: int = 9):
     
     return sum(trailhead_scores)
 
+def bfs_2(grid: list[list[int]], target_value: int, r: int, c: int) -> int:
+    n_rows = len(grid)
+    n_cols = len(grid[0])
+    score = 0
+    next_visit = get_neighbours(grid, r, c, n_rows, n_cols)
+    while next_visit:
+        new_visit = []
+        for nr, nc in next_visit:
+            if grid[nr][nc] == target_value:
+                score += 1
+            else:
+                new_visit.extend(get_neighbours(grid, nr, nc, n_rows, n_cols))
+        
+        next_visit = new_visit
+
+    return score
+
+def p2(filename: str, trailhead_ids: int = 0, target_value: int = 9):
+    """ BFS no need to cache """
+    grid = load_grid(filename)
+    nrows = len(grid)
+    ncols = len(grid[0])
+    trailhead_scores = []
+    for r in range(nrows):
+        for c in range(ncols):
+            if grid[r][c] == trailhead_ids:
+                score = bfs_2(grid, target_value, r, c)
+                trailhead_scores.append(score)
+    
+    return sum(trailhead_scores)
 
 if __name__ == "__main__":
-    print(day1("./2024/d10-sample.txt"))
-    print(day1("./2024/d10-sample-2.txt"))
-    print(day1("./2024/d10.txt"))
+    print("Part 1")
+    print(p1("./2024/d10-sample.txt"))
+    print(p1("./2024/d10-sample-2.txt"))
+    print(p1("./2024/d10.txt"))
+
+    print("Part 2")
+    print(p2("./2024/d10-sample.txt"))
+    print(p2("./2024/d10-sample-2.txt"))
+    print(p2("./2024/d10.txt"))
