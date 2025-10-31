@@ -108,6 +108,7 @@ def calc_press_a(px, py, bax, bay, bby, bbx):
 
 
 def p2(configs):
+    """ System of linear equations """
     cost_a = 3
     cost_b = 1
     m_costs = []
