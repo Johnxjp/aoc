@@ -95,7 +95,45 @@ def p1(configs):
     return total_cost
 
 
+def calc_press_b(px, py, bax, bay, bby, bbx):
+    num = px * bay - py * bax
+    denom = bbx * bay - bby * bax
+    return num / denom
+
+
+def calc_press_a(px, py, bax, bay, bby, bbx):
+    num = px * bby - py * bbx
+    denom = bby * bax - bbx * bay
+    return num / denom
+
+
+def p2(configs):
+    cost_a = 3
+    cost_b = 1
+    m_costs = []
+    for machine in configs:
+        ba, bb, prize = machine
+        px, py = prize
+        px, py = px + 10000000000000, py + 10000000000000
+        bax, bay = ba
+        bbx, bby = bb
+        cost = -1
+        press_b = max(calc_press_b(px, py, bax, bay, bby, bbx), 0)
+        press_a = max(calc_press_a(px, py, bax, bay, bby, bbx), 0)
+        if int(press_a) * bax + int(press_b) * bbx == px:
+            cost = press_a * cost_a + press_b * cost_b
+        m_costs.append(int(cost))
+
+    total_cost = sum(c for c in m_costs if c != -1)
+    return total_cost
+
+
 if __name__ == "__main__":
     print(p1(load("./2024/d13-sample.txt")))
     print(p1(load("./2024/d13-sample-2.txt")))
     print(p1(load("./2024/d13.txt")))
+
+    # Part 2
+    print(p2(load("./2024/d13-sample.txt")))
+    print(p2(load("./2024/d13-sample-2.txt")))
+    print(p2(load("./2024/d13.txt")))
